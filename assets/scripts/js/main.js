@@ -1,23 +1,48 @@
 //$(document).ready(function() {
-	$.ajaxPrefilter( function( options, originalOptions, jqXHR) {
-		options.url = 'api/' + options.url;
-	});
-
+//	$.ajaxPrefilter( function( options, originalOptions, jqXHR) {
+//		options.url = 'api/' + options.url;
+//	});
+	var Item = Backbone.Model.extend();
+	
 	var Articles = Backbone.Collection.extend({
-		url: 'posts.json'
+		model: Item,
+		url: 'api/posts.json',
+		
+		parse: function(response) {
+			return response.results;
+		},
+		
+		sync: function(method, model, options) {
+			var that = this;
+			var params = _.extend({
+				type: 'GET',
+				dataType: 'json',
+				url: that.url,
+				processData:false
+			}, options);
+			
+			return $.ajax(params);
+		}
 	});
 	
 	var ArticleList = Backbone.View.extend({
 		el: '.view',
+		
+		initialize: function() {
+			_.bindAll(this, 'render');
+			this.collection = new Articles();
+			this.render();
+		},
 		render: function () {
 			var that = this;
 			var articles = new Articles();
-			articles.fetch({
+			articles.collection.fetch({
 				success: function(articles) {
-					var template = _.template($('#article-list-template').html(), {articles: articles.models});
-					that.$el.html(template);
+//					var template = _.template($('#article-list-template').html(), {articles: articles.models});
+//					that.$el.html(template);
+					console.log(that.collection.toJSON());
 				}
-			})
+			});
 		}
 	});
 	
